@@ -2,8 +2,9 @@
   "name": "uint1array",
   "version": "1.0.5",
   "description": "Uint1Array - JavaScript's missing Typed Array",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "rm -rf dist && broccoli build dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,5 +21,15 @@
     "bitfield"
   ],
   "author": "Kris <dontmailme@gmail.com> (https://2yago.com)",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "babel-preset-env": "^1.6.1",
+    "broccoli": "^1.1.4",
+    "broccoli-babel-transpiler": "^6.1.2",
+    "browserslist": "^2.11.3"
+  },
+  "browserslist": [
+    "> 2%",
+    "ie 11"
+  ]
 }
