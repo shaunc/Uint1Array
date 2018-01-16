@@ -21,7 +21,7 @@
 
   function test_display() {
     const bits = new Uint1Array(128);
-    console.log("Bits", bits );  
+    console.log("Bits", bits );
   }
 
   function test_methods() {
@@ -41,7 +41,7 @@
     const source = new Uint32Array([ 2378462, 324578634, 3458743 ]);
     const bits = new Uint1Array( source );
     console.log( source, bits+'');
-    const bitfield = new Uint1Array( source.buffer ); 
+    const bitfield = new Uint1Array( source.buffer );
     console.log( source, bitfield+'');
   }
 
@@ -57,7 +57,7 @@
     const bytes = new Uint8Array( byte_values );
     const bit_field = new Uint1Array( bytes.buffer );
 
-    console.log( `${bit_field}` ); // Uint1Array [ ] 
+    console.log( `${bit_field}` ); // Uint1Array [ ]
   }
 
   function test_readme_3() {
@@ -75,15 +75,15 @@
     // From another TypedArray's buffer
     var x = new Uint8Array([21, 31]);
     var y = new Uint1Array(x.buffer);
-    console.log(""+y); // 
+    console.log(""+y); //
 
     // From an ArrayBuffer
     var buffer = new ArrayBuffer(8);
     var z = new Uint1Array(buffer, 1, 4);
 
-    // From an iterable 
-    var iterable = function*(){ yield* [1,0,1]; }(); 
-    var uint8 = new Uint1Array(iterable); 
+    // From an iterable
+    var iterable = function*(){ yield* [1,0,1]; }();
+    var uint8 = new Uint1Array(iterable);
     console.log( ""+uint8 );
     // Uint1Array[1, 0, 1]
   }
