@@ -1,82 +1,77 @@
-"use strict";
-{
-  const Uint1Array = require('./index.js');
-  const TESTS = [
-    [ 'sort', '0001111111' ],
-    [ 'reverse', '0111111010' ],
-    [ 'map', '1111111111', x => x + 1 ],
-    [ 'map', '1010000001', x => x ^ 1 ]
-  ];
+/**
+  * @module test/tests
+  */
+const Uint1Array = require('../src/index.js');
+const chai = require('chai')
+const expect = chai.expect
 
-  test();
+const TESTS = [
+  [ 'sort', '0001111111' ],
+  [ 'reverse', '0111111010' ],
+  [ 'map', '1111111111', x => x + 1 ],
+  [ 'map', '1010000001', x => x ^ 1 ]
+];
 
-  function test() {
-    test_display();
-    test_methods();
-    test_bitfield();
-    test_readme_1();
-    test_readme_2();
-    test_readme_3();
-  }
+describe('Uint1Array', () => {
 
-  function test_display() {
+  it('display', () => {
     const bits = new Uint1Array(128);
-    console.log("Bits", bits );
-  }
-
-  function test_methods() {
+    expect(bits.toString()).to.equal(
+      `Uint1Array [ ${bits.map(b => b + '').join(', ')} ]`)
+  })
+  it('methods', () => {
     const source = [0,1,0,1,1,1,1,1,1,0];
     let score = 0;
     TESTS.forEach( ([method, expected, ...args]) => {
       const subject = new Uint1Array( Array.from( source ) );
-      const result = exec( subject, method, ...args );
-      const score_1 = result == expected ? "PASS" : "FAIL";
-      if ( score_1 == "PASS" ) score += 1;
-      console.log( `Test ${method} expected ${expected}, got ${result}, OK? ${score_1}` );
-    });
-    console.log( `Tests: ${ TESTS.length }, PASSED: ${ score }, FAILED : ${ TESTS.length - score }` );
-  }
-
-  function test_bitfield() {
+      const result = subject[method](...args).join('')
+      expect(result).to.equal(expected, `test ${method}`)
+    })
+  })
+  it('bitfield', () => {
     const source = new Uint32Array([ 2378462, 324578634, 3458743 ]);
     const bits = new Uint1Array( source );
-    console.log( source, bits+'');
+    expect([...bits]).to.eql([1, 1, 1])
     const bitfield = new Uint1Array( source.buffer );
-    console.log( source, bitfield+'');
-  }
+    expect([...bitfield].map(b => ''+b).join('')).to.eql(
+      '011110110101001000100100000000000101001010110101000' +
+      '110101100100011101101011000110010110000000000')
+  })
 
-  function test_readme_1() {
+  it('coerce ints', () => {
     const coerced_bits = new Uint1Array( [1,2,3,0] );
-    console.log( `${coerced_bits}` ); // Uint1Array [ 1, 1, 1, 0 ]
-  }
-
-  function test_readme_2() {
+    expect([...coerced_bits]).to.eql([1, 1, 1, 0])
+  })
+  it('coerce string', () => {
     const message = "JAVASCRIPT ROCKS";
     const byte_values = message.split('').map( c => c.charCodeAt(0) );
 
     const bytes = new Uint8Array( byte_values );
-    const bit_field = new Uint1Array( bytes.buffer );
-
-    console.log( `${bit_field}` ); // Uint1Array [ ]
-  }
-
-  function test_readme_3() {
+    const bitfield = new Uint1Array( bytes.buffer );
+    expect(conc(bitfield)).to.equal(
+      '0101001010000010011010101000001011001010110000100100101010010010'
+    + '0000101000101010000001000100101011110010110000101101001011001010'
+    )
+  })
+  it('from length', () => {
     // From a length
     var uint8 = new Uint1Array(2);
-    uint8[0] = 42;
-    console.log(uint8[0]); // 1
-    console.log(uint8.length); // 2
-    console.log(Uint1Array.BYTES_PER_ELEMENT); // 0.125
-
-    // From an array
+    uint8.setBit(0, 42);
+    expect(uint8.getBit(0)).to.equal(1)
+    expect(uint8.length).to.equal(2)
+    expect(Uint1Array.BYTES_PER_ELEMENT).to.equal(0.125)
+  })
+  it('from array', () => {
     var arr = new Uint1Array([21,31]);
-    console.log(arr[1]); // 1
-
+    expect(arr.getBit(1)).to.equal(1)
+  })
+  it('from another typed array\'s buffer', () => {
     // From another TypedArray's buffer
     var x = new Uint8Array([21, 31]);
     var y = new Uint1Array(x.buffer);
-    console.log(""+y); //
-
+    expect(conc(y)).to.eql('1010100011111000')
+  })
+  it('from array buffer', () => {
     // From an ArrayBuffer
     var buffer = new ArrayBuffer(8);
     var z = new Uint1Array(buffer, 1, 4);
@@ -84,12 +79,9 @@
     // From an iterable
     var iterable = function*(){ yield* [1,0,1]; }();
     var uint8 = new Uint1Array(iterable);
-    console.log( ""+uint8 );
-    // Uint1Array[1, 0, 1]
-  }
-
-  function exec( target, method, ...args ) {
-    const result = target[method](...args);
-    return result.join('');
-  }
+    expect(conc(uint8)).to.eql('101')
+  })
+})
+function conc(a) {
+  return a.map(a => '' + a).join('')
 }

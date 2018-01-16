@@ -166,10 +166,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         } });
 
       // proxy for array-like bracket-accessor via index
-
-      var accessorProxy = new BracketAccessorProxy(this);
-
-      return accessorProxy;
+      try {
+        var accessorProxy = new BracketAccessorProxy(this);
+        return accessorProxy;
+      } catch (err) {
+        if (err.constructor.name !== 'ReferenceError') {
+          throw err;
+        }
+        // no Proxy available ... gracefully degrade...
+        // use "getBit" and "setBit" instead
+      }
     }
 
     // Static property slots on the constructor
@@ -331,7 +337,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           return toBit(v);
         });
         for (var i = offset; i < last; i++) {
-          this[i] = arr[i - offset];
+          this[$].setBit(i, arr[i - offset]);
         }
       }
     }, {
@@ -391,6 +397,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function toJSON() {
         return Array.from(this);
       }
+
+      // provide alternate to array '[]' access if proxy isn't available
+
+    }, {
+      key: "getBit",
+      value: function getBit(idx) {
+        return this[$].getBit(idx);
+      }
+    }, {
+      key: "setBit",
+      value: function setBit(idx, value) {
+        this[$].setBit(idx, toBit(value));
+      }
     }, {
       key: "buffer",
 
@@ -444,11 +463,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       get: function get() {
         return "Uint1Array";
       }
-    }, {
-      key: "length",
-      get: function get() {
-        return 0;
-      }
+      // static get length() {
+      //   return 0;
+      // }
+
     }, {
       key: Symbol.species,
       get: function get() {
